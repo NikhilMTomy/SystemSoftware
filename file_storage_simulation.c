@@ -21,28 +21,7 @@ int trim(char *string) {
         }
     }
 }
-int sortFiles() {
-    int i, j;
-    struct File *tempFile;
-    for (i=1; i<currentDirectory->fileCount; i++) {
-        tempFile = currentDirectory->fileList[i];
-        for (j=i-1; j>=0 && strcmp(currentDirectory->fileList[j]->fileName, tempFile->fileName) > 0; j--) {
-            currentDirectory->fileList[j+1] = currentDirectory->fileList[j];
-        }
-        currentDirectory->fileList[j+1] = tempFile;
-    }
-}
-int sortDirectory() {
-    int i, j;
-    struct Directory *tempDirectory;
-    for (i=1; i<currentDirectory->directoryCount; i++) {
-        tempDirectory = currentDirectory->directoryList[i];
-        for (j=i-1; j>=0 && strcmp(currentDirectory->directoryList[j]->directoryName, tempDirectory->directoryName) > 0; j--) {
-            currentDirectory->directoryList[j+1] = currentDirectory->directoryList[j];
-        }
-        currentDirectory->directoryList[j+1] = tempDirectory;
-    }
-}
+int searchSuccessfull = 0;
 int createNewFile(char *fileName) {
     struct File *newFile;
     int i, j;
@@ -112,13 +91,55 @@ int changeDirectory(char *directoryName) {
         if (strcmp(currentDirectory->directoryList[i]->directoryName, directoryName) == 0) {
             currentDirectory = currentDirectory->directoryList[i];
             printf("Switched to child '%s'\n", currentDirectory->directoryName);
-            printf("dirCount : %d\n", currentDirectory->directoryCount);
             return 0;
         }
     }
     return -1;
 }
-int listAllDirectories() {
+int getFullPath(struct Directory *directory, char *fullpath) {
+    if (directory->parentDirectory == NULL) {
+        fullpath[0] = '\0';
+        strcat(fullpath, directory->directoryName);
+        return 0;
+    } else {
+        getFullPath(directory->parentDirectory, fullpath);
+        strcat(fullpath, directory->directoryName);
+        return 0;
+    }
+}
+int search(struct Directory *currentDirectory, char *searchString) {
+    int i;
+    char fullpath[1024];
+    searchSuccessfull = 0;
+    for (i=0; i<currentDirectory->fileCount; i++) {
+        if (strcmp(currentDirectory->fileList[i]->fileName, searchString) == 0) {
+            getFullPath(currentDirectory, fullpath);
+            printf("File found in %s", fullpath);
+            searchSuccessfull = 1;
+            return searchSuccessfull;
+        }
+    }
+    for (i=0; i<currentDirectory->directoryCount; i++) {
+        if (strcmp(currentDirectory->directoryList[i]->directoryName, searchString) == 0) {
+            getFullPath(currentDirectory, fullpath);
+            printf("Directory found in %s", fullpath);
+            searchSuccessfull = 1;
+            return searchSuccessfull;
+        }
+        search(currentDirectory->directoryList[i], searchString);
+        if (searchSuccessfull == 1) {
+            return searchSuccessfull;
+        }
+    }
+}
+int listAllFiles(struct Directory *currentDirectory) {
+    int i;
+    for (i=0; i<currentDirectory->fileCount; i++) {
+        printf("%s\n", currentDirectory->fileList[i]->fileName);
+    }
+    return 0;
+}
+int listAllDirectories(struct Directory *currentDirectory) {
     int i;
     if (currentDirectory->parentDirectory != NULL) {
         printf("..\n");
@@ -128,18 +149,26 @@ int listAllDirectories() {
     }
     return 0;
 }
-int listAllFiles() {
-    int i;
+int listDirectory(struct Directory *currentDirectory) {
+    printf("\nContents of directory '%s':\n", currentDirectory->directoryName);
+    listAllDirectories(currentDirectory);
+    listAllFiles(currentDirectory);
+}
+int displayStructure(struct Directory *currentDirectory, int level) {
+    int i, j;
+    for (i=0; i<currentDirectory->directoryCount; i++) {
+        for(j=0; j<level; j++) {
+            printf("|- ");
+        }
+        printf("%s/\n", currentDirectory->directoryList[i]->directoryName);
+        displayStructure(currentDirectory->directoryList[i], level+1);
+    }
     for (i=0; i<currentDirectory->fileCount; i++) {
+        for(j=0; j<level; j++) {
+            printf("|- ");
+        }
         printf("%s\n", currentDirectory->fileList[i]->fileName);
     }
-    return 0;
-}
-int listDirectory() {
-    int i;
-    printf("\nContents of directory '%s':\n", currentDirectory->directoryName);
-    listAllDirectories();
-    listAllFiles();
 }
 int deleteAllNodes(struct Directory *directory) {
     int i;
@@ -181,26 +210,131 @@ int deleteDirectory(char *directoryName) {
     }
     return -1;
 }
-int main() {
-    int i, choice;
-    char buffer[64];
+int singleLevelDirectory() {
+    int choice = 1;
+    char buffer[64], fullpath[1024];
     struct Directory rootDirectory;
     strcpy(rootDirectory.directoryName, "/");
     rootDirectory.fileCount = 0;
     rootDirectory.directoryCount = 0;
+    rootDirectory.parentDirectory = NULL;
     currentDirectory = &rootDirectory;
     while (choice != 7) {
         printf("********************************************************************************\n");
         printf("**************************************MENU**************************************\n");
         printf("********************************************************************************\n");
         printf("Current working Directory: '%s'\n", currentDirectory->directoryName);
+        getFullPath(currentDirectory, fullpath);
+        printf("Fullpath : '%s'\n", fullpath);
+        printf("1.Create file\n");
+        printf("2.Create directory\n");
+        printf("3.Search file/directory\n");
+        printf("4.Delete file\n");
+        printf("5.Delete directory\n");
+        printf("6.View Structure\n");
+        printf("7.Back\n");
+        printf("Enter choice : ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1:
+                printf("\n\tCreate new file\n");
+                while ((getchar()) != '\n');
+                printf("Enter fileName : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (createNewFile(buffer)==0) {
+                    printf("INFO: Succesfully created file '%s'", buffer);
+                } else {
+                    printf("ERROR: Failed to create file '%s'", buffer);
+                }
+                break;
+            case 2:
+                printf("\n\tCreate new directory\n");
+                while ((getchar()) != '\n');
+                printf("Enter directory name : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (createNewDirectory(buffer) == 0) {
+                    printf("INFO: Succesfully created directory '%s'", buffer);
+                } else {
+                    printf("ERROR: Failed to create directory '%s'", buffer);
+                }
+                break;
+            case 3:
+                printf("\n\tSearch file/directory\n");
+                while ((getchar()) != '\n');
+                printf("\nEnter search string : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                search(currentDirectory, buffer);
+                if (searchSuccessfull != 1) {
+                    printf("ERROR: No file/directory with specified name found\n");
+                }
+                break;
+            case 4:
+                printf("\n\tDelete file\n");
+                printf("Available files:\n");
+                listAllFiles(currentDirectory);
+                printf("\nEnter file name : ");
+                while((getchar()) != '\n');
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (deleteFile(buffer) == -1) {
+                    printf("ERROR: No file with name '%s' found\n", buffer);
+                } else {
+                    printf("INFO: Successfully deleted '%s'", buffer);
+                }
+                break;
+            case 5:
+                printf("\n\tDelete directory\n");
+                printf("Available directories:\n");
+                listAllDirectories(currentDirectory);
+                printf("\nEnter directory name : ");
+                while((getchar()) != '\n');
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (deleteDirectory(buffer) == -1) {
+                    printf("ERROR: No directory with name '%s' found\n", buffer);
+                } else {
+                    printf("INFO: Successfully deleted directory '%s'", buffer);
+                }
+                break;
+            case 6:
+                printf("\n\tList Current Directory\n");
+                listDirectory(currentDirectory);
+                break;
+            case 7:
+                break;
+            default:
+                printf("Invalid choice\n");
+                break;
+        }
+        printf("\n\n");
+    }
+    deleteAllNodes(&rootDirectory);
+}
+int multiLevelDirectory() {
+    int choice = 1;
+    char buffer[64];
+    struct Directory rootDirectory;
+    strcpy(rootDirectory.directoryName, "/");
+    rootDirectory.fileCount = 0;
+    rootDirectory.parentDirectory = NULL;
+    rootDirectory.directoryCount = 0;
+    currentDirectory = &rootDirectory;
+    while (choice != 8) {
+        printf("********************************************************************************\n");
+        printf("**************************************MENU**************************************\n");
+        printf("********************************************************************************\n");
+        printf("Current working Directory: '%s'\n", currentDirectory->directoryName);
         printf("1.Create file in current directory\n");
         printf("2.Create directory in current directory\n");
-        printf("3.Change directory\n");
-        printf("4.Delete file in current directory\n");
-        printf("5.Delete directory in current directory\n");
-        printf("6.View Structure\n");
-        printf("7.Exit\n");
+        printf("3.Search file/directory\n");
+        printf("4.Change directory\n");
+        printf("5.Delete file in current directory\n");
+        printf("6.Delete directory in current directory\n");
+        printf("7.View Structure\n");
+        printf("8.Back\n");
         printf("Enter choice : ");
         scanf("%d", &choice);
         switch(choice) {
@@ -230,9 +364,20 @@ int main() {
                 }
                 break;
             case 3:
+                printf("\n\tSearch file/directory\n");
+                while ((getchar()) != '\n');
+                printf("\nEnter search string : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                search(currentDirectory, buffer);
+                if (searchSuccessfull != 1) {
+                    printf("ERROR: No file/directory with specified name found\n");
+                }
+                break;
+            case 4:
                 printf("\n\tChange directory\n");
                 printf("Available directories:\n");
-                listAllDirectories();
+                listAllDirectories(currentDirectory);
                 while ((getchar()) != '\n');
                 printf("\nEnter directory name : ");
                 fgets(buffer, 32, stdin);
@@ -243,10 +388,10 @@ int main() {
                     printf("INFO: Succesfully changed current directory");
                 }
                 break;
-            case 4:
+            case 5:
                 printf("\n\tDelete file\n");
                 printf("Available files:\n");
-                listAllFiles();
+                listAllFiles(currentDirectory);
                 printf("\nEnter file name : ");
                 while((getchar()) != '\n');
                 fgets(buffer, 32, stdin);
@@ -257,10 +402,10 @@ int main() {
                     printf("INFO: Successfully deleted '%s'", buffer);
                 }
                 break;
-            case 5:
+            case 6:
                 printf("\n\tDelete directory\n");
                 printf("Available directories:\n");
-                listAllDirectories();
+                listAllDirectories(currentDirectory);
                 printf("\nEnter directory name : ");
                 while((getchar()) != '\n');
                 fgets(buffer, 32, stdin);
@@ -271,11 +416,11 @@ int main() {
                     printf("INFO: Successfully deleted directory '%s'", buffer);
                 }
                 break;
-            case 6:
-                printf("\n\tList Current Directory\n");
-                listDirectory();
-                break;
             case 7:
+                printf("\n\tList Current Directory\n");
+                displayStructure(&rootDirectory, 0);
+                break;
+            case 8:
                 break;
             default:
                 printf("Invalid choice\n");
@@ -284,5 +429,143 @@ int main() {
         printf("\n\n");
     }
     deleteAllNodes(&rootDirectory);
+}
+int heirarchialDirectory() {
+    int choice = 1;
+    char buffer[64];
+    struct Directory rootDirectory;
+    strcpy(rootDirectory.directoryName, "/");
+    rootDirectory.fileCount = 0;
+    rootDirectory.parentDirectory = NULL;
+    rootDirectory.directoryCount = 0;
+    currentDirectory = &rootDirectory;
+    while (choice != 8) {
+        printf("********************************************************************************\n");
+        printf("**************************************MENU**************************************\n");
+        printf("********************************************************************************\n");
+        printf("Current working Directory: '%s'\n", currentDirectory->directoryName);
+        printf("1.Create file in current directory\n");
+        printf("2.Create directory in current directory\n");
+        printf("3.Search file/directory\n");
+        printf("4.Change directory\n");
+        printf("5.Delete file in current directory\n");
+        printf("6.Delete directory in current directory\n");
+        printf("7.View Structure\n");
+        printf("8.Back\n");
+        printf("Enter choice : ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1:
+                printf("\n\tCreate new file\n");
+                while ((getchar()) != '\n');
+                printf("Enter fileName : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (createNewFile(buffer)==0) {
+                    printf("INFO: Succesfully created file '%s'", buffer);
+                } else {
+                    printf("ERROR: Failed to create file '%s'", buffer);
+                }
+                break;
+            case 2:
+                printf("\n\tCreate new directory\n");
+                printf("Current directory List\n");
+                while ((getchar()) != '\n');
+                printf("Enter directory name : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (createNewDirectory(buffer) == 0) {
+                    printf("INFO: Succesfully created directory '%s'", buffer);
+                } else {
+                    printf("ERROR: Failed to create directory '%s'", buffer);
+                }
+                break;
+            case 3:
+                printf("\n\tSearch file/directory\n");
+                while ((getchar()) != '\n');
+                printf("Enter search string : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                search(currentDirectory, buffer);
+                if (searchSuccessfull != 1) {
+                    printf("ERROR: No file/directory with specified name found\n");
+                }
+                break;
+            case 4:
+                printf("\n\tChange directory\n");
+                printf("Available directories:\n");
+                listAllDirectories(currentDirectory);
+                while ((getchar()) != '\n');
+                printf("\nEnter directory name : ");
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (changeDirectory(buffer) == -1) {
+                    printf("ERROR: No directory with specified name found\n");
+                } else {
+                    printf("INFO: Succesfully changed current directory");
+                }
+                break;
+            case 5:
+                printf("\n\tDelete file\n");
+                printf("Available files:\n");
+                listAllFiles(currentDirectory);
+                printf("\nEnter file name : ");
+                while((getchar()) != '\n');
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (deleteFile(buffer) == -1) {
+                    printf("ERROR: No file with name '%s' found\n", buffer);
+                } else {
+                    printf("INFO: Successfully deleted '%s'", buffer);
+                }
+                break;
+            case 6:
+                printf("\n\tDelete directory\n");
+                printf("Available directories:\n");
+                listAllDirectories(currentDirectory);
+                printf("\nEnter directory name : ");
+                while((getchar()) != '\n');
+                fgets(buffer, 32, stdin);
+                trim(buffer);
+                if (deleteDirectory(buffer) == -1) {
+                    printf("ERROR: No directory with name '%s' found\n", buffer);
+                } else {
+                    printf("INFO: Successfully deleted directory '%s'", buffer);
+                }
+                break;
+            case 7:
+                printf("\n\tList Current Directory\n");
+                displayStructure(&rootDirectory, 0);
+                break;
+            case 8:
+                break;
+            default:
+                printf("Invalid choice\n");
+                break;
+        }
+        printf("\n\n");
+    }
+    deleteAllNodes(&rootDirectory);
+}
+int main() {
+    int choice = 1;
+    while (choice != 4) {
+        printf("********************************************************************************\n");
+        printf("************************************MAINMENU************************************\n");
+        printf("********************************************************************************\n");
+        printf("\t1.Single Level directory\n");
+        printf("\t2.Multi level directory\n");
+        printf("\t3.Heirarchial directory\n");
+        printf("\t4.Exit\n");
+        printf("Enter choice : ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1: singleLevelDirectory();         break;
+            case 2: multiLevelDirectory();          break;
+            case 3: heirarchialDirectory();         break;
+            case 4: break;
+            default: printf("Invalid choice\n");    break;
+        }
+    }
     return 0;
 }
