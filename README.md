@@ -1,18 +1,18 @@
 # System Software  
 - [x] Simulate the following CPU scheduling  
-    a. FCFS  
-    b. SJF  
-    c. Round Robin  
-    d. Priority
+    FCFS  
+    SJF  
+    Round Robin  
+    Priority  
 - [x] Simulate the following file organization techniques  
-    a. Single level directory  
-    b. Multi level directory  
-    d. Heirarchical
+    Single level directory  
+    Multi level directory  
+    Heirarchical  
 - [ ] Implement Banker's algorithm for deadlock avoidance  
 - [ ] Simulate the following disk scheduling algorithms  
-    a. FCFS  
-    b. SCAN  
-    c. C-SCAN
+    FCFS  
+    SCAN  
+    C-SCAN  
 - [ ] Implement the producer consumer problem using semaphores  
 - [ ] Write a program to simulate the working of dining philosopher's problem  
 - [ ] Implement pass one of a two pass assembler  
