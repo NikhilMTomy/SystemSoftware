@@ -1,0 +1,149 @@
+********************************************************************************
+************************************MAINMENU************************************
+********************************************************************************
+        1.Single Level directory
+        2.Multi level directory
+        3.Heirarchial directory
+        4.Exit
+Enter choice : 1
+********************************************************************************
+**************************************MENU**************************************
+********************************************************************************
+Current working Directory: '/'
+Fullpath : '/'
+1.Create file
+2.Create directory
+3.Search file/directory
+4.Delete file
+5.Delete directory
+6.View Structure
+7.Back
+Enter choice : 1
+
+        Create new file
+Enter fileName : file1
+INFO: Succesfully created file 'file1'
+
+********************************************************************************
+**************************************MENU**************************************
+********************************************************************************
+Current working Directory: '/'
+Fullpath : '/'
+1.Create file
+2.Create directory
+3.Search file/directory
+4.Delete file
+5.Delete directory
+6.View Structure
+7.Back
+Enter choice : 2
+
+        Create new directory
+Enter directory name : dir1
+INFO: Succesfully created directory 'dir1'
+
+********************************************************************************
+**************************************MENU**************************************
+********************************************************************************
+Current working Directory: '/'
+Fullpath : '/'
+1.Create file
+2.Create directory
+3.Search file/directory
+4.Delete file
+5.Delete directory
+6.View Structure
+7.Back
+Enter choice : 3
+
+        Search file/directory
+
+Enter search string : dir1
+Directory found in /
+
+********************************************************************************
+**************************************MENU**************************************
+********************************************************************************
+Current working Directory: '/'
+Fullpath : '/'
+1.Create file
+2.Create directory
+3.Search file/directory
+4.Delete file
+5.Delete directory
+6.View Structure
+7.Back
+Enter choice : 6
+
+        List Current Directory
+
+Contents of directory '/':
+dir1
+file1
+
+
+********************************************************************************
+**************************************MENU**************************************
+********************************************************************************
+Current working Directory: '/'
+Fullpath : '/'
+1.Create file
+2.Create directory
+3.Search file/directory
+4.Delete file
+5.Delete directory
+6.View Structure
+7.Back
+Enter choice : 4
+
+        Delete file
+Available files:
+file1
+
+Enter file name : file1
+INFO: Successfully deleted 'file1'
+
+********************************************************************************
+**************************************MENU**************************************
+********************************************************************************
+Current working Directory: '/'
+Fullpath : '/'
+1.Create file
+2.Create directory
+3.Search file/directory
+4.Delete file
+5.Delete directory
+6.View Structure
+7.Back
+Enter choice : 5
+
+        Delete directory
+Available directories:
+dir1
+
+Enter directory name : dir1
+INFO: Successfully deleted directory 'dir1'
+
+********************************************************************************
+**************************************MENU**************************************
+********************************************************************************
+Current working Directory: '/'
+Fullpath : '/'
+1.Create file
+2.Create directory
+3.Search file/directory
+4.Delete file
+5.Delete directory
+6.View Structure
+7.Back
+Enter choice : 7
+
+
+********************************************************************************
+************************************MAINMENU************************************
+********************************************************************************
+        1.Single Level directory
+        2.Multi level directory
+        3.Heirarchial directory
+        4.Exit
+Enter choice : 4

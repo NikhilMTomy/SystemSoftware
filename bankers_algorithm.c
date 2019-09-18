@@ -50,7 +50,6 @@ int main() {
 
     while (processLeft != 0) {
         completedProcess = 0;
-        printf("%d\n", processLeft);
         for (i=0; i<processCount; i++) {
             neededAvailable = 1;
             if (processCompletion[i] == 1) {
@@ -63,7 +62,6 @@ int main() {
                 }
             }
             if (neededAvailable) {
-                printf("Executing process P%d\n", i);
                 completedProcess++;
                 for (j=0; j<resourceCount; j++) {
                     availableResource[j] += allocatedResources[i][j];
