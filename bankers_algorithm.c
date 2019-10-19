@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main() {
-    int i, j, processCount, resourceCount, allocatedResources[32][32], maximumRequired[32][32], neededResources[32][32], resourceInstances[32], availableResource[32], doneIndex[32];
+    int i, j, processCount, resourceCount, allocatedResources[32][32], maximumRequired[32][32], neededResources[32][32], resourceInstances[32], availableResource[32];
     int currentlyAllocated, processLeft=0, neededAvailable, processCompletion[32], completedProcess, orderIndex=0;
     char order[32][3];
     printf("Enter number of processes : ");
