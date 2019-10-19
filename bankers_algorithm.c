@@ -1,11 +1,5 @@
 #include <stdio.h>
 
-/*int numberInArray(int number, int array[], int size) {
-    int i;
-    for (i=0; i<size; i++) {
-        if (array[i] == )
-    }
-}*/
 int main() {
     int i, j, processCount, resourceCount, allocatedResources[32][32], maximumRequired[32][32], neededResources[32][32], resourceInstances[32], availableResource[32], doneIndex[32];
     int currentlyAllocated, processLeft=0, neededAvailable, processCompletion[32], completedProcess, orderIndex=0;
