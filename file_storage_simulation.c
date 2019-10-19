@@ -20,6 +20,7 @@ int trim(char *string) {
             string[i] = '\0';
         }
     }
+    return 0;
 }
 int searchSuccessfull = 0;
 int createNewFile(char *fileName) {
@@ -131,6 +132,7 @@ int search(struct Directory *currentDirectory, char *searchString) {
             return searchSuccessfull;
         }
     }
+    return searchSuccessfull;
 }
 int listAllFiles(struct Directory *currentDirectory) {
     int i;
@@ -153,8 +155,9 @@ int listDirectory(struct Directory *currentDirectory) {
     printf("\nContents of directory '%s':\n", currentDirectory->directoryName);
     listAllDirectories(currentDirectory);
     listAllFiles(currentDirectory);
+    return 0;
 }
-int displayStructure(struct Directory *currentDirectory, int level) {
+void displayStructure(struct Directory *currentDirectory, int level) {
     int i, j;
     for (i=0; i<currentDirectory->directoryCount; i++) {
         for(j=0; j<level; j++) {
@@ -210,7 +213,7 @@ int deleteDirectory(char *directoryName) {
     }
     return -1;
 }
-int singleLevelDirectory() {
+void singleLevelDirectory() {
     int choice = 1;
     char buffer[64], fullpath[1024];
     struct Directory rootDirectory;
@@ -313,7 +316,7 @@ int singleLevelDirectory() {
     }
     deleteAllNodes(&rootDirectory);
 }
-int multiLevelDirectory() {
+void multiLevelDirectory() {
     int choice = 1;
     char buffer[64];
     struct Directory rootDirectory;
@@ -430,7 +433,7 @@ int multiLevelDirectory() {
     }
     deleteAllNodes(&rootDirectory);
 }
-int heirarchialDirectory() {
+void heirarchialDirectory() {
     int choice = 1;
     char buffer[64];
     struct Directory rootDirectory;
