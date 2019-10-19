@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <math.h>
+#include <stdlib.h>
 
-void sort(int array[], int size) {
+int sort(int array[], int size) {
     int i, j, temp, minpos;
     for (i=0; i<size; i++) {
         minpos = i;
@@ -16,8 +16,9 @@ void sort(int array[], int size) {
             array[i] = temp;
         }
     }
+    return 0;
 }
-void fcfs(int maxRange, int queue[], int seekCount, int initialHead) {
+int fcfs(int queue[], int seekCount, int initialHead) {
     int i, headMovements=0;
     printf("FCFS\n");
     printf("%d", initialHead);
@@ -30,8 +31,9 @@ void fcfs(int maxRange, int queue[], int seekCount, int initialHead) {
         }
     }
     printf("\nHead movements : %d\n", headMovements);
+    return 0;
 }
-int scan(int maxRange, int queue[], int seekCount, int initialHead) {
+int scan(int queue[], int seekCount, int initialHead) {
     int i, initialHeadIndex, headMovements = 0;
     printf("SCAN\n");
     sort(queue, seekCount);
@@ -60,6 +62,7 @@ int scan(int maxRange, int queue[], int seekCount, int initialHead) {
         }
     }
     printf("\nHead movements : %d\n", headMovements);
+    return 0;
 }
 int cscan(int maxRange, int queue[], int seekCount, int initialHead) {
     int i, initialHeadIndex, headMovements=0;
@@ -91,6 +94,7 @@ int cscan(int maxRange, int queue[], int seekCount, int initialHead) {
         }
     }
     printf("\nHead movements : %d\n", headMovements);
+    return 0;
 }
 int main() {
     int i, maxRange, queue[128], seekCount, initialHead;
@@ -110,13 +114,14 @@ int main() {
     scanf("%c", &ch);
     switch(ch) {
         case '1':
-            fcfs(maxRange, queue, seekCount, initialHead);
+            fcfs(queue, seekCount, initialHead);
             break;
         case '2':
-            scan(maxRange, queue, seekCount, initialHead);
+            scan(queue, seekCount, initialHead);
             break;
         case '3':
             cscan(maxRange, queue, seekCount, initialHead);
             break;
     }
+    return 0;
 }
