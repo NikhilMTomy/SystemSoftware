@@ -4,7 +4,7 @@
 
 struct structSymtab {
     char label[64];
-    long location;
+    int location;
 } SYMTAB[10];
 char OPTAB[][10] = {"START", "LDA", "STA", "LDCH", "STCH"};
 int symtabLength = 0;
@@ -82,7 +82,7 @@ int isInSYMTAB(char *label) {
     }
     return 0;
 }
-int addToSYMTAB(char *label, long location) {
+int addToSYMTAB(char *label, int location) {
     strcpy(SYMTAB[symtabLength].label, label);
     SYMTAB[symtabLength++].location = location;
 }
@@ -96,27 +96,37 @@ int lengthOfConstant(char *operand) {
     return length;
 }
 int main() {
-    FILE *src, *dest, *symbolTableFile;
-    long LOCCTR = 0, startposition = 0, i;
+    FILE *src, *dest, *symbolTableFile, *lengthFile;
+    int LOCCTR = 0, startposition = 0, i;
     char currentLine[128], fieldLabel[64], fieldOperator[64], fieldOperand[64];
 
     src = fopen("source.asm", "r");
     dest = fopen("intermediate.dat", "w");
-    while (fgets(currentLine, 128, src) != NULL) {
+    fgets(currentLine, 128, src);
+	removeNewLine(currentLine);
+    parseLine(currentLine, fieldLabel, fieldOperator, fieldOperand);
+    if (stringEquals(fieldOperator, "START")) {
+        LOCCTR = startposition = atoi(fieldOperand);
+        printf("Starting address : %d\n", LOCCTR);
+        fgets(currentLine, 128, src);
+    }
+    fprintf(dest, "%d\t%s\t%s\t%s\n", 
+            LOCCTR, 
+            (stringEquals(fieldLabel, ""))?("****"):(fieldLabel),
+            fieldOperator,
+            (stringEquals(fieldOperand, ""))?("****"):(fieldOperand));
+    while (!stringEquals(fieldOperator, "END")) {
         removeNewLine(currentLine);
         //printf("|%s|\n", currentLine);
 
         parseLine(currentLine, fieldLabel, fieldOperator, fieldOperand);
 
         //printf("LABEL: [%s]\nOPERATOR: [%s]\nOPERAND: [%s]\n", fieldLabel, fieldOperator, fieldOperand);
-
-        if (stringEquals(fieldOperator, "START") != 0) {
-            printf("Start line found.\n");
-            LOCCTR = atoi(fieldOperand);
-            printf("Starting address : %d\n", LOCCTR);
-            startposition = LOCCTR;
-        }
-        fprintf(dest, "%d\t%s\n", LOCCTR, currentLine);
+        fprintf(dest, "%d\t%s\t%s\t%s\n", 
+                LOCCTR, 
+                (stringEquals(fieldLabel, ""))?("****"):(fieldLabel),
+                fieldOperator,
+                (stringEquals(fieldOperand, ""))?("****"):(fieldOperand));
         if (!isComment(currentLine)) {
             if (!stringEquals(fieldLabel, "")) {
                 if (isInSYMTAB(fieldLabel)) {
@@ -137,16 +147,27 @@ int main() {
             } else if (stringEquals(fieldOperator, "BYTE")) {
                 LOCCTR += lengthOfConstant(fieldOperand);
             } else {
-                printf("Undefined nmeumonic %s\n", fieldOperator);
+                printf("Undefined mnemonic %s\n", fieldOperator);
                 break;
             }
         }
+        fgets(currentLine, 128, src);
+        parseLine(currentLine, fieldLabel, fieldOperator, fieldOperand);
     }
+	fprintf(dest, "%d\t%s\t%s\t%s\n", 
+			LOCCTR, 
+			(stringEquals(fieldLabel, ""))?("****"):(fieldLabel),
+			fieldOperator,
+			(stringEquals(fieldOperand, ""))?("****"):(fieldOperand));
     printf("Program length : %d\n", LOCCTR - startposition);
     symbolTableFile = fopen("symbolTable.dat", "w");
     for (i=0; i<symtabLength; i++) {
         fprintf(symbolTableFile, "%d\t%s\n", SYMTAB[i].location, SYMTAB[i].label);
     }
+	lengthFile = fopen("lengthFile.dat","w");
+	fprintf(lengthFile, "%d\n", LOCCTR-startposition);
     fclose(src);
     fclose(dest);
+	fclose(symbolTableFile);
+	fclose(lengthFile);
 }
